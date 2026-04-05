@@ -1,3 +1,7 @@
+class DNSQuestion:
+    def __init__(self, domain):
+        self.domain = domain
+
 #https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-5 
 opCodes = {
     0 : "Query",
@@ -23,7 +27,7 @@ rCodes = {
     8 : "NXRRSet", 
     9 : "NotAuth", 
     10 : "NotZone", 
-    11  : "DSOTYPENI",	
+    11 : "DSOTYPENI",	
     16 : "BADVERS",	
     16 : "BADSIG",	
     17 : "BADKEY",	
@@ -42,7 +46,71 @@ with open('ExamplePacket', "rb") as dnsPacket:
     numberOfQuestions = int.from_bytes(dnsPacket.read(2))
     numberofAwnserRRs = int.from_bytes(dnsPacket.read(2))
     numberofAuthorityRRs = int.from_bytes(dnsPacket.read(2))
-    numberofAditionalRRs = int.from_bytes(dnsPacket.read(2))
+    numberofAdditionalRRs = int.from_bytes(dnsPacket.read(2))
+    
+    for i in range(numberOfQuestions):
+        domain = ""
+        while True:
+            length = int.from_bytes(dnsPacket.read(1)) 
+            if length == 0: 
+                break
+            else:
+                domain += str(dnsPacket.read(length))
+        domain = domain.replace("'b'", ".").replace("b'", "").replace("'", "")
+        questionType = dnsPacket.read(2)
+        questionclass = dnsPacket.read(2)
+    
+    for i in range(numberofAwnserRRs):
+        recordName = ""
+        while True:
+            length = int.from_bytes(dnsPacket.read(1)) 
+            if length == 192: 
+                offset = int.from_bytes(dnsPacket.read(1)) 
+                break
+            elif length == 0: 
+                break
+            else:
+                recordName += str(dnsPacket.read(length))
+        resouceRecordType = dnsPacket.read(2)
+        resouceRecordClass = dnsPacket.read(2)
+        ttl = dnsPacket.read(4)
+        resourceDataLength = int.from_bytes(dnsPacket.read(2))
+        data = dnsPacket.read(resourceDataLength)
+
+
+    for i in range(numberofAdditionalRRs):
+        recordName = ""
+        while True:
+            length = int.from_bytes(dnsPacket.read(1)) 
+            if length == 192: 
+                offset = int.from_bytes(dnsPacket.read(1)) 
+                break
+            elif length == 0: 
+                break
+            else:
+                recordName += str(dnsPacket.read(length))
+        resouceRecordType = dnsPacket.read(2)
+        resouceRecordClass = dnsPacket.read(2)
+        ttl = dnsPacket.read(4)
+        resourceDataLength = int.from_bytes(dnsPacket.read(2))
+        data = dnsPacket.read(resourceDataLength)
+
+    for i in range(numberofAuthorityRRs):
+        recordName = ""
+        while True:
+            length = int.from_bytes(dnsPacket.read(1)) 
+            if length == 192: 
+                offset = int.from_bytes(dnsPacket.read(1)) 
+                break
+            elif length == 0: 
+                break
+            else:
+                recordName += str(dnsPacket.read(length))
+        resouceRecordType = dnsPacket.read(2)
+        resouceRecordClass = dnsPacket.read(2)
+        ttl = dnsPacket.read(4)
+        resourceDataLength = int.from_bytes(dnsPacket.read(2))
+        data = dnsPacket.read(resourceDataLength)     
 
 print("Identification (in Hex): " + "0x" + str(identification)[2:-1].replace("\\x", ""))
 
@@ -106,7 +174,7 @@ if not assingedRCode:
 print("Number of Questions: " + str(numberOfQuestions) )
 print("Number of Anwnser Resource Records: " + str(numberofAwnserRRs))
 print("Number of Authority Resource Records: " + str(numberofAuthorityRRs))
-print("Number of Additional Resource Records: " + str(numberofAditionalRRs))
+print("Number of Additional Resource Records: " + str(numberofAdditionalRRs))
 
 
 # binaryFlag = bin(int.from_bytes(flag,"big")) 
