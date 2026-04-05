@@ -7,7 +7,7 @@ Scans a binary file with the format of:
 - Additional resource records (variable length)
 
 **Note: 
-Will only recognise common record types: **
+Will only recognise common record types:**
 - A Record
 - AAAA Record
 - CNAME Record
