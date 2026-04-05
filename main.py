@@ -48,7 +48,11 @@ def createRecord(dnsPacket):
             resouceRecordType = RRTypes[type]
             break 
 
-    resouceRecordClass = dnsPacket.read(2)
+    resouceRecordClass = int.from_bytes(dnsPacket.read(2))
+    
+    if resouceRecordClass == 1: 
+        resouceRecordClass = "Internet"
+    
     ttl = dnsPacket.read(4)
     resourceDataLength = int.from_bytes(dnsPacket.read(2))
     data = dnsPacket.read(resourceDataLength)
@@ -64,8 +68,17 @@ def createQuestion(dnsPacket):
         else:
             domain += str(dnsPacket.read(length))
     domain = domain.replace("'b'", ".").replace("b'", "").replace("'", "")
-    questionType = dnsPacket.read(2)
-    questionclass = dnsPacket.read(2)
+    questionType = int.from_bytes(dnsPacket.read(2))
+
+    for type in RRTypes.keys():
+        if type == questionType:
+            questionType = RRTypes[type]
+            break 
+
+    questionclass = int.from_bytes(dnsPacket.read(2))
+    if questionclass == 1: 
+        questionclass = "Internet"
+
     return DNSQuestion(domain, questionType, questionclass)
 
 #https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-5 
