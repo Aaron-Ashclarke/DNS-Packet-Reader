@@ -35,6 +35,18 @@ def createRecord(dnsPacket):
         length = int.from_bytes(dnsPacket.read(1)) 
         if length == 192: 
             offset = int.from_bytes(dnsPacket.read(1)) 
+            currentSpot = dnsPacket.tell()
+            dnsPacket.seek(offset, 1)
+            
+            while True:
+                length = int.from_bytes(dnsPacket.read(1)) 
+                if length == 0: 
+                    break
+                elif length == 192:
+                    break
+                else:
+                    recordName += str(dnsPacket.read(length))
+            dnsPacket.seek(currentSpot)
             break
         elif length == 0: 
             break
@@ -67,6 +79,7 @@ def createQuestion(dnsPacket):
             break
         else:
             domain += str(dnsPacket.read(length))
+            
     domain = domain.replace("'b'", ".").replace("b'", "").replace("'", "")
     questionType = int.from_bytes(dnsPacket.read(2))
 
