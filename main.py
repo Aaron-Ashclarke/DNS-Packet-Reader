@@ -28,30 +28,26 @@ class ResourceRecord:
         print("Data: " + str(self.data))
 
 
-def createRecord(dnsPacket):
-    recordName = ""
-
+def offsetScanner(dnsPacket):
+    string = ""
     while True:
         length = int.from_bytes(dnsPacket.read(1)) 
+        if length == 0: 
+            break
         if length == 192: 
             offset = int.from_bytes(dnsPacket.read(1)) 
             currentSpot = dnsPacket.tell()
-            dnsPacket.seek(offset, 1)
-            
-            while True:
-                length = int.from_bytes(dnsPacket.read(1)) 
-                if length == 0: 
-                    break
-                elif length == 192:
-                    break
-                else:
-                    recordName += str(dnsPacket.read(length))
+            dnsPacket.seek(offset)
+            string += offsetScanner(dnsPacket)
             dnsPacket.seek(currentSpot)
             break
-        elif length == 0: 
-            break
         else:
-            recordName += str(dnsPacket.read(length))
+            string += str(dnsPacket.read(length))
+
+    return string
+
+def createRecord(dnsPacket):
+    recordName = offsetScanner(dnsPacket).replace("'b'", ".").replace("b'", "").replace("'", "")
 
     resouceRecordType = int.from_bytes(dnsPacket.read(2))
     
